@@ -1,11 +1,10 @@
-package menu;
+package controller;
 
-import java.io.IOException;
 import java.util.Scanner;
 
-public class MenuMain extends Menu {
+public class MainController {
 
-	public MenuMain() {
+	public MainController() {
 		super();
 
 		Scanner sc = new Scanner(System.in);
@@ -26,24 +25,25 @@ public class MenuMain extends Menu {
 			System.out.println("|   0   | Thoat chuong trinh    |");
 			System.out.println("+-------+-----------------------+");
 			System.out.print("- Vui long chon 1-2-3-4-0: ");
-			action = sc.nextInt();
+			action = Integer.parseInt(sc.nextLine());
 
 			switch (action) {
 			case 1:
-				new MenuStudent().menu();
+				new StudentController();
 				break;
 			case 2:
-				new MenuClass().menu();
+				new ClassController();
 				break;
 			case 3:
-				new MenuSubject().menu();
+				new SubjectController();
 				break;
 			case 4:
-				new MenuScore().menu();
+				new ScoreController();
 				break;
 			}
 		} while (action != 0);
 
 		System.out.println("Cam on ban da su dung chuong trinh!");
+		sc.close();
 	}
 }

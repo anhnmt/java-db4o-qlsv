@@ -1,11 +1,11 @@
 package qlsv;
 
-import menu.MenuMain;
+import controller.MainController;
 
 public class Main {
 
 	public static void main(String[] args) {
 		// Chay menu chuong trinh
-		new MenuMain();
+		new MainController();
 	}
 }

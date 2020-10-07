@@ -1,4 +1,4 @@
-package menu;
+package controller;
 
 import java.util.List;
 import java.util.Scanner;
@@ -6,15 +6,14 @@ import java.util.Scanner;
 import qlsv.DB;
 import model.Student;
 import model.Class;
-import com.db4o.query.Query;
 
-public class MenuStudent extends Menu {
+import com.db4o.ObjectSet;
+
+public class StudentController {
 	private static Scanner sc = new Scanner(System.in);
 	private static DB DB = new DB();
 
-	public void menu() {
-		clrscr();
-
+	public StudentController() {
 		int action;
 
 		do {
@@ -23,33 +22,31 @@ public class MenuStudent extends Menu {
 			System.out.println("+-------+-----------------------+");
 			System.out.println("|   1   | Them sinh vien        |");
 			System.out.println("+-------+-----------------------+");
-			System.out.println("|   2   | Sua sinh vien         |");
+			System.out.println("|   2   | In danh sach          |");
 			System.out.println("+-------+-----------------------+");
-			System.out.println("|   3   | Xoa sinh vien         |");
+			System.out.println("|   3   | Sua sinh vien         |");
 			System.out.println("+-------+-----------------------+");
-			System.out.println("|   4   | In danh sach          |");
+			System.out.println("|   4   | Xoa sinh vien         |");
 			System.out.println("+-------+-----------------------+");
 			System.out.println("|   5   | Tim kiem sinh vien    |");
 			System.out.println("+-------+-----------------------+");
 			System.out.println("|   0   | Quay lai Menu chinh   |");
 			System.out.println("+-------+-----------------------+");
 			System.out.print("- Vui long chon 1-2-3-4-5-0: ");
-			action = sc.nextInt();
+			action = Integer.parseInt(sc.nextLine());
 
 			switch (action) {
 			case 1:
 				create();
 				break;
 			case 2:
-				clrscr();
 				read();
 				break;
 			case 3:
 				update();
 				break;
 			case 4:
-				clrscr();
-				read();
+				delete();
 				break;
 			case 5:
 				search();
@@ -58,19 +55,24 @@ public class MenuStudent extends Menu {
 		} while (action != 0);
 	}
 
-	private static void create() {
-		DB.beginTransaction();
+	private List<Student> query() {
+		List<Student> list = DB.container.queryByExample(Student.class);
+		return list;
+	}
+
+	private void create() {
+		DB.begin();
 		int n;
 
 		System.out.println("+-------------- THEM SINH VIEN --------------+");
 
 		try {
 			System.out.print("- Nhap so sinh vien can them: ");
-			n = sc.nextInt();
+			n = Integer.parseInt(sc.nextLine());
 
 			for (int i = 0; i < n; i++) {
 				Student sv = new Student();
-//				sv.input();
+
 				System.out.println("Nhap thong tin sinh vien: ");
 
 				do {
@@ -80,8 +82,11 @@ public class MenuStudent extends Menu {
 						String studentId = sc.nextLine();
 						if (studentId.length() < 1 || studentId.equals("")) {
 							System.out.println("- Ma sinh vien khong duoc de trong");
+						} else if (query().stream()
+								.anyMatch(o -> o.getStudentId().compareToIgnoreCase(studentId) == 0)) {
+							System.out.println("- Ma sinh vien da ton tai, vui long chon lai");
 						} else {
-							sv.setStudentId(studentId);
+							sv.setStudentId(studentId.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -97,7 +102,7 @@ public class MenuStudent extends Menu {
 						if (studentName.length() < 1 || studentName.equals("")) {
 							System.out.println("- Ten sinh vien khong duoc de trong");
 						} else {
-							sv.setStudentName(studentName);
+							sv.setStudentName(studentName.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -122,20 +127,12 @@ public class MenuStudent extends Menu {
 					System.out.println("- Ma lop hoc: ");
 
 					try {
-						String studentClass = sc.nextLine();
+						String classId = sc.nextLine();
 
-						Query query = DB.query();
-						query.constrain(Class.class);
-//						query.descend("_giaovien").descend("_ten").constrain(studentClass);
-						List<Class> listClass = DB.execute(query);
-
-						if (studentClass.length() < 1 || studentClass.equals("")) {
+						if (classId.length() < 1 || classId.equals("")) {
 							System.out.println("- Ma lop hoc khong duoc de trong");
-						} else if (listClass.stream()
-								.anyMatch(obj -> obj.getClassId().compareToIgnoreCase(studentClass) == 0)) {
-							System.out.println("- Ma lop hoc da ton tai, vui long chon lai");
 						} else {
-							sv.setStudentClass(studentClass);
+							sv.setClassId(classId.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -146,33 +143,96 @@ public class MenuStudent extends Menu {
 				DB.store(sv); // luu sinh vien vao database
 			}
 
-			DB.commitTransaction();
+			DB.commit();
 		} catch (Exception e) {
-			DB.rollbackTransaction();
+			DB.rollback();
 		}
 	}
 
-	private static void read() {
-		List<Student> list = DB.getClass(Student.class);
-
+	private void read() {
 		System.out.println("+------------ DANH SACH SINH VIEN ------------+");
 		System.out.println("+-------+------------+-----------+------------+");
 		System.out.println("|  ID   | TEN        | GIOI TINH | LOP HOC    |");
 		System.out.println("+-------+------------+-----------+------------+");
-		for (Student sv : list) {
-			System.out.printf("| %-5s | %-10s | %-9s | %-10s |\n", sv.getStudentId(), sv.getStudentName(),
-					sv.getStudentGender() ? "Nam" : "Nu", sv.getStudentClass());
+		query().stream().sorted((o1, o2) -> o1.getStudentId().compareTo(o2.getStudentId())).forEach(obj -> {
+			System.out.printf("| %-5s | %-10s | %-9s | %-10s |\n", obj.getStudentId(), obj.getStudentName(),
+					obj.getStudentGender() ? "NAM" : "NU", obj.getClassId());
 			System.out.println("+-------+------------+-----------+------------+");
-		}
+		});
 	}
 
 	private void update() {
-		// TODO Auto-generated method stub
 
+		try {
+			Class obj = new Class();
+
+			System.out.println("+------------ CAP NHAT SINH VIEN ------------+");
+			System.out.println("- Nhap ma sinh vien: ");
+			sc.nextLine();
+			String classId = sc.nextLine();
+			obj.setClassId(classId.toUpperCase());
+
+			ObjectSet<?> result = DB.container.queryByExample(obj);
+
+			if (result.size() > 0) {
+				Class presult = (Class) result.next();
+				System.out.println("- Nhap ten sinh vien can sua: ");
+				String className = sc.nextLine();
+				presult.setClassName(className.toUpperCase());
+				DB.store(presult);
+
+				System.out.println("Sua sinh vien thanh cong");
+			} else {
+				System.out.println("- Ma sinh vien khong ton tai");
+			}
+
+			DB.commit();
+		} catch (Exception e) {
+			DB.rollback();
+		}
+	}
+
+	private void delete() {
+		try {
+			Student obj = new Student();
+
+			System.out.println("+------------ XOA SINH VIEN ------------+");
+			System.out.println("- Nhap ma sinh vien: ");
+			String studentId = sc.nextLine();
+			obj.setStudentId(studentId.toUpperCase());
+
+			ObjectSet<?> result = DB.container.queryByExample(obj);
+
+			if (result.size() > 0) {
+				Student presult = (Student) result.next();
+				DB.delete(presult);
+
+				System.out.println("Xoa sinh vien thanh cong");
+			} else {
+				System.out.println("- Ma sinh vien khong ton tai, vui long chon lai");
+			}
+
+			DB.commit();
+		} catch (Exception e) {
+			DB.rollback();
+		}
 	}
 
 	private void search() {
-		// TODO Auto-generated method stub
+		System.out.println("+------------ TIM KIEM SINH VIEN ------------+");
+		System.out.println("- Nhap ma sinh vien can tim: ");
+		String classId = sc.nextLine();
 
+		System.out.println("+-------+------------+-----------+------------+");
+		System.out.println("|  ID   | TEN        | GIOI TINH | LOP HOC    |");
+		System.out.println("+-------+------------+-----------+------------+");
+
+		query().stream().filter(o -> {
+			return o.getClassId().contains(classId.toUpperCase());
+		}).forEach(obj -> {
+			System.out.printf("| %-5s | %-10s | %-9s | %-10s |\n", obj.getStudentId(), obj.getStudentName(),
+					obj.getStudentGender() ? "Nam" : "Nu", obj.getClassId());
+			System.out.println("+-------+------------+-----------+------------+");
+		});
 	}
 }

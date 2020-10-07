@@ -1,8 +1,8 @@
 package model;
 
 public class Class {
-	private String classId;
-	private String className;
+	private String classId; // Mã lớp học
+	private String className; // Tên lớp học
 
 	public Class() {
 		super();

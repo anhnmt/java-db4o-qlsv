@@ -1,27 +1,19 @@
-package menu;
+package controller;
 
 import java.util.List;
 import java.util.Scanner;
 
-import com.db4o.query.Query;
+import com.db4o.ObjectSet;
 
 import model.Class;
 import qlsv.DB;
 
-public class MenuClass {
+public class ClassController {
 	private static Scanner sc = new Scanner(System.in);
 	private static DB DB = new DB();
 
-	private List<Class> query() {
-		Query query = DB.query();
-		query.constrain(Class.class);
-//		query.descend("_giaovien").descend("_ten").constrain(studentClass);
-		List<Class> listClass = DB.execute(query);
-		return listClass;
-	}
-
-	public void menu() {
-		clrscr();
+	public ClassController() {
+		super();
 
 		int action;
 
@@ -42,14 +34,13 @@ public class MenuClass {
 			System.out.println("|   0   | Quay lai Menu chinh   |");
 			System.out.println("+-------+-----------------------+");
 			System.out.print("- Vui long chon 1-2-3-4-5-0: ");
-			action = sc.nextInt();
+			action = Integer.parseInt(sc.nextLine());
 
 			switch (action) {
 			case 1:
 				create();
 				break;
 			case 2:
-				clrscr();
 				read();
 				break;
 			case 3:
@@ -65,8 +56,13 @@ public class MenuClass {
 		} while (action != 0);
 	}
 
+	private List<Class> query() {
+		List<Class> list = DB.container.queryByExample(Class.class);
+		return list;
+	}
+
 	private void create() {
-		DB.beginTransaction();
+		DB.begin();
 		int n;
 
 		System.out.println("+-------------- THEM LOP HOC --------------+");
@@ -77,7 +73,7 @@ public class MenuClass {
 			n = Integer.parseInt(sc.nextLine());
 
 			for (int i = 0; i < n; i++) {
-				Class lh = new Class();
+				Class obj = new Class();
 
 				System.out.println("Nhap thong tin lop hoc: ");
 
@@ -85,16 +81,14 @@ public class MenuClass {
 					System.out.println("- Ma lop hoc: ");
 
 					try {
-//						sc.nextLine();
 						String classId = sc.nextLine();
 
 						if (classId.length() < 1 || classId.equals("")) {
 							System.out.println("- Ma lop hoc khong duoc de trong");
-						} else if (query().stream()
-								.anyMatch(obj -> obj.getClassId().compareToIgnoreCase(classId) == 0)) {
+						} else if (query().stream().anyMatch(o -> o.getClassId().compareToIgnoreCase(classId) == 0)) {
 							System.out.println("- Ma lop hoc da ton tai, vui long chon lai");
 						} else {
-							lh.setClassId(classId);
+							obj.setClassId(classId.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -110,7 +104,7 @@ public class MenuClass {
 						if (className.length() < 1 || className.equals("")) {
 							System.out.println("- Ten lop hoc khong duoc de trong");
 						} else {
-							lh.setClassName(className);
+							obj.setClassName(className.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -118,37 +112,81 @@ public class MenuClass {
 					}
 				} while (true);
 
-				DB.store(lh); // luu lop hoc vao database
+				DB.store(obj); // luu lop hoc vao database
 			}
 
-			DB.commitTransaction();
+			DB.commit();
 		} catch (Exception e) {
-			DB.rollbackTransaction();
+			DB.rollback();
 		}
 
 	}
 
 	private void read() {
-		List<Class> list = DB.getClass(Class.class);
-
 		System.out.println("+------------ DANH SACH LOP HOC ------------+");
 		System.out.println("+--------+-------------+");
 		System.out.println("|  ID    | TEN LOP HOC |");
 		System.out.println("+--------+-------------+");
-		for (Class lh : list) {
-			System.out.printf("| %-6s | %-11s |\n", lh.getClassId(), lh.getClassName());
+
+		query().stream().sorted((o1, o2) -> o1.getClassId().compareTo(o2.getClassId())).forEach(obj -> {
+			System.out.printf("| %-6s | %-11s |\n", obj.getClassId(), obj.getClassName());
 			System.out.println("+--------+-------------+");
-		}
+		});
 	}
 
 	private void update() {
-		// TODO Auto-generated method stub
+		try {
+			Class obj = new Class();
 
+			System.out.println("+------------ CAP NHAT LOP HOC ------------+");
+			System.out.println("- Nhap ma lop hoc: ");
+			sc.nextLine();
+			String classId = sc.nextLine();
+			obj.setClassId(classId.toUpperCase());
+
+			ObjectSet<?> result = DB.container.queryByExample(obj);
+
+			if (result.size() > 0) {
+				Class presult = (Class) result.next();
+				System.out.println("- Nhap ten lop hoc can sua: ");
+				String className = sc.nextLine();
+				presult.setClassName(className.toUpperCase());
+				DB.store(presult);
+				System.out.println("Sua lop hoc thanh cong");
+			} else {
+				System.out.println("- Ma lop hoc khong ton tai");
+			}
+
+			DB.commit();
+		} catch (Exception e) {
+			DB.rollback();
+		}
 	}
 
 	private void delete() {
-		// TODO Auto-generated method stub
+		try {
+			Class obj = new Class();
 
+			System.out.println("+------------ XOA LOP HOC ------------+");
+			System.out.println("- Nhap ma lop hoc: ");
+			sc.nextLine();
+			String classId = sc.nextLine();
+			obj.setClassId(classId.toUpperCase());
+
+			ObjectSet<?> result = DB.container.queryByExample(obj);
+
+			if (result.size() > 0) {
+				Class presult = (Class) result.next();
+				DB.delete(presult);
+				System.out.println("Xoa lop hoc thanh cong");
+			} else {
+				System.out.println("- Ma lop hoc khong ton tai, vui long chon lai");
+			}
+
+			DB.commit();
+		} catch (Exception e) {
+			DB.rollback();
+		}
 	}
 
 	private void search() {
@@ -161,17 +199,11 @@ public class MenuClass {
 		System.out.println("|  ID    | TEN LOP HOC |");
 		System.out.println("+--------+-------------+");
 
-		query().stream().filter(obj -> {
-			return obj.getClassId().compareToIgnoreCase(classId) == 0;
-		}).forEach(lh -> {
-			System.out.printf("| %-6s | %-11s |\n", lh.getClassId(), lh.getClassName());
+		query().stream().filter(o -> {
+			return o.getClassId().contains(classId.toUpperCase());
+		}).forEach(obj -> {
+			System.out.printf("| %-6s | %-11s |\n", obj.getClassId(), obj.getClassName());
 			System.out.println("+--------+-------------+");
 		});
-	}
-
-	public static void clrscr() {
-		// Clears Screen in java
-		for (int i = 0; i < 50; ++i)
-			System.out.println();
 	}
 }

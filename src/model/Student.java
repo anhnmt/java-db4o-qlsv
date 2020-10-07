@@ -1,21 +1,21 @@
 package model;
 
 public class Student {
-	private String studentId;
-	private String studentName;
-	private Boolean studentGender;
-	private String studentClass;
+	private String studentId; // Mã sinh viên
+	private String studentName; // Tên sinh viên
+	private Boolean studentGender; // Giới tính
+	private String classId; // Mã lớp học
 
 	public Student() {
 		super();
 	}
 
-	public Student(String studentId, String studentName, Boolean studentGender, String studentClass) {
+	public Student(String studentId, String studentName, Boolean studentGender, String classId) {
 		super();
 		this.studentId = studentId;
 		this.studentName = studentName;
 		this.studentGender = studentGender;
-		this.studentClass = studentClass;
+		this.classId = classId;
 	}
 
 	public String getStudentId() {
@@ -42,18 +42,18 @@ public class Student {
 		this.studentGender = studentGender;
 	}
 
-	public String getStudentClass() {
-		return studentClass;
+	public String getClassId() {
+		return classId;
 	}
 
-	public void setStudentClass(String studentClass) {
-		this.studentClass = studentClass;
+	public void setClassId(String classId) {
+		this.classId = classId;
 	}
 
 	@Override
 	public String toString() {
 		return "Student [studentId=" + studentId + ", studentName=" + studentName + ", studentGender=" + studentGender
-				+ ", studentClass=" + studentClass + "]";
+				+ ", classId=" + classId + "]";
 	}
 
 }

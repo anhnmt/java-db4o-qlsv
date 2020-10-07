@@ -11,10 +11,10 @@ import com.db4o.query.Query;
 public class DB {
 
 	// khai bao ten CSDL
-	private static final String DB_FILE = "qlsv.db4o";
+	private final String DB_FILE = "qlsv.db4o";
 
 	// khai bao object container chua CSDL
-	private ObjectContainer container;
+	public ObjectContainer container = null;
 
 	public DB() {
 		this.openDB();
@@ -23,30 +23,30 @@ public class DB {
 	// phuong thuc mo CSDL
 	public void openDB() {
 		final EmbeddedConfiguration config = Db4oEmbedded.newConfiguration();
-		this.container = Db4oEmbedded.openFile(config, DB.DB_FILE);
+		this.container = Db4oEmbedded.openFile(config, this.DB_FILE);
 	}
 
 	// phuong thuc dong CSDL
-	public void closeCSDL() {
+	public void closeDB() {
 		this.container.close();
 	}
 
 	// phuong thuc xoa CSDL
-	public void xoaCSDL() {
-		this.closeCSDL();
+	public void deleteDB() {
+		this.closeDB();
 		this.container = null;
-		new File(DB.DB_FILE).delete();
+		new File(this.DB_FILE).delete();
 	}
 
-	public void beginTransaction() {
+	public void begin() {
 		// db4o tu dong bat dau giao tac - transaction
 	}
 
-	public void commitTransaction() {
+	public void commit() {
 		this.container.commit();
 	}
 
-	public void rollbackTransaction() {
+	public void rollback() {
 		this.container.rollback();
 	}
 
@@ -55,13 +55,18 @@ public class DB {
 		this.container.store(obj);
 	}
 
+	// luu tru doi tuong vao CSDL
+	public void delete(final Object obj) {
+		this.container.delete(obj);
+	}
+
 	// thuc thi truy van du lieu
 	public Query query() {
 		return this.container.query();
 	}
 
 	// dua ra danh sach doi tuong dai dien cua lop
-	public <T> List<T> getClass(final Class<?> obj) {
+	public <T> List<T> getByClass(final Class<?> obj) {
 		final Query query = this.container.query();
 		query.constrain(obj);
 		return this.execute(query);
@@ -70,5 +75,9 @@ public class DB {
 	// dua ra danh sach ket qua cua truy van
 	public <T> List<T> execute(final Query query) {
 		return query.execute();
+	}
+
+	protected void finalize() {
+		closeDB();
 	}
 }
