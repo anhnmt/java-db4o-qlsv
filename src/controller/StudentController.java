@@ -71,7 +71,7 @@ public class StudentController {
 			n = Integer.parseInt(sc.nextLine());
 
 			for (int i = 0; i < n; i++) {
-				Student sv = new Student();
+				Student obj = new Student();
 
 				System.out.println("Nhap thong tin sinh vien: ");
 
@@ -86,7 +86,7 @@ public class StudentController {
 								.anyMatch(o -> o.getStudentId().compareToIgnoreCase(studentId) == 0)) {
 							System.out.println("- Ma sinh vien da ton tai, vui long chon lai");
 						} else {
-							sv.setStudentId(studentId.toUpperCase());
+							obj.setStudentId(studentId.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -102,7 +102,7 @@ public class StudentController {
 						if (studentName.length() < 1 || studentName.equals("")) {
 							System.out.println("- Ten sinh vien khong duoc de trong");
 						} else {
-							sv.setStudentName(studentName.toUpperCase());
+							obj.setStudentName(studentName.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -116,7 +116,7 @@ public class StudentController {
 
 					if (strGender.equals("true") || strGender.equals("false")) {
 						Boolean studentGender = Boolean.parseBoolean(strGender);
-						sv.setStudentGender(studentGender);
+						obj.setStudentGender(studentGender);
 						break;
 					} else {
 						System.out.println("- Gioi tinh sinh vien chi nhap true/false");
@@ -132,7 +132,7 @@ public class StudentController {
 						if (classId.length() < 1 || classId.equals("")) {
 							System.out.println("- Ma lop hoc khong duoc de trong");
 						} else {
-							sv.setClassId(classId.toUpperCase());
+							obj.setClassId(classId.toUpperCase());
 							break;
 						}
 					} catch (Exception e) {
@@ -140,7 +140,7 @@ public class StudentController {
 					}
 				} while (true);
 
-				DB.store(sv); // luu sinh vien vao database
+				DB.store(obj); // luu sinh vien vao database
 			}
 
 			DB.commit();
