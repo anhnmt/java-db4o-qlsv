@@ -66,6 +66,16 @@ public class ScoreController {
 		return list;
 	}
 
+	private List<Student> queryStudent() {
+		List<Student> list = DB.container.queryByExample(Student.class);
+		return list;
+	}
+
+	private List<Subject> querySubject() {
+		List<Subject> list = DB.container.queryByExample(Subject.class);
+		return list;
+	}
+
 	private void create() {
 		DB.begin();
 		int n;
@@ -88,7 +98,7 @@ public class ScoreController {
 						String studentId = sc.nextLine();
 						if (studentId.length() < 1 || studentId.equals("")) {
 							System.out.println("- Ma sinh vien khong duoc de trong");
-						} else if (query().stream()
+						} else if (queryStudent().stream()
 								.anyMatch(o -> o.getStudentId().compareToIgnoreCase(studentId) < 0)) {
 							System.out.println("- Ma sinh vien khong ton tai, vui long chon lai");
 						} else {
@@ -108,7 +118,7 @@ public class ScoreController {
 
 						if (subjectId.length() < 1 || subjectId.equals("")) {
 							System.out.println("- Ma mon hoc khong duoc de trong");
-						} else if (query().stream()
+						} else if (querySubject().stream()
 								.anyMatch(o -> o.getSubjectId().compareToIgnoreCase(subjectId) < 0)) {
 							System.out.println("- Ma mon hoc khong ton tai, vui long chon lai");
 						} else {

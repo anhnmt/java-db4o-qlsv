@@ -168,7 +168,7 @@ public class StudentController {
 
 			System.out.println("+------------ CAP NHAT SINH VIEN ------------+");
 			System.out.println("- Nhap ma sinh vien: ");
-			sc.nextLine();
+			System.out.flush();
 			String classId = sc.nextLine();
 			obj.setClassId(classId.toUpperCase());
 
